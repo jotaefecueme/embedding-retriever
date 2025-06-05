@@ -11,7 +11,7 @@ class Retriever:
     
     def load_index(self, collection_id: str):
         if collection_id in self.faiss_indices:
-            return  # Ya cargado
+            return  
         index_path = f"{self.base_path}/{collection_id}"
         self.faiss_indices[collection_id] = FAISS.load_local(
             index_path,
