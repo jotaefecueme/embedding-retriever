@@ -24,7 +24,4 @@ class Retriever:
         if collection_id not in self.faiss_indices:
             self.load_index(collection_id)
         results = self.faiss_indices[collection_id].similarity_search(query, k=k)
-        for doc in results:
-            print("Doc content:", doc.page_content[:100]) 
-            print("Metadata:", doc.metadata)
         return results
