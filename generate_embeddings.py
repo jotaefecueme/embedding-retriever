@@ -2,11 +2,25 @@ import os
 from langchain_community.document_loaders import TextLoader
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.schema import Document
 
-def generate_faiss_indexes(root_docs_dir="documentos", output_dir="faiss_indexes", embedding_model_name="intfloat/multilingual-e5-base", chunk_size=1000, chunk_overlap=100):
+def custom_split_by_headers(documents, separator="###"):
+    split_docs = []
+    for doc in documents:
+        parts = doc.page_content.split(separator)
+        for part in parts:
+            cleaned = part.strip()
+            if cleaned:
+                split_docs.append(Document(page_content=cleaned, metadata=doc.metadata))
+    return split_docs
+
+def generate_faiss_indexes(
+    root_docs_dir="documentos",
+    output_dir="faiss_indexes",
+    embedding_model_name="intfloat/multilingual-e5-small",
+    separator="###"
+):
     embeddings = HuggingFaceEmbeddings(model_name=embedding_model_name)
-
     os.makedirs(output_dir, exist_ok=True)
 
     for collection_name in os.listdir(root_docs_dir):
@@ -24,9 +38,7 @@ def generate_faiss_indexes(root_docs_dir="documentos", output_dir="faiss_indexes
                 docs = loader.load()
                 documents.extend(docs)
 
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-        docs_split = text_splitter.split_documents(documents)
-
+        docs_split = custom_split_by_headers(documents, separator=separator)
         print(f"Generando embeddings y creando FAISS para {collection_name} con {len(docs_split)} fragmentos...")
 
         faiss_index = FAISS.from_documents(docs_split, embeddings)
