@@ -4,7 +4,7 @@ from langchain_community.vectorstores import FAISS
 class Retriever:
     def __init__(self, base_path: str):
         self.base_path = base_path
-        self.embedding_model_name = "intfloat/multilingual-e5-base"
+        self.embedding_model_name = "intfloat/multilingual-e5-small"
         self.embedding_model = HuggingFaceEmbeddings(model_name=self.embedding_model_name)
         self.faiss_indices = {}
 
